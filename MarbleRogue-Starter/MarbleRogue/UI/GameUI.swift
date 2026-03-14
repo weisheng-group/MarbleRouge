@@ -100,7 +100,7 @@ struct HUDView: View {
             HStack(spacing: 20) {
                 HUDItem(title: "分数", value: "\(score)", color: .yellow)
                 HUDItem(title: "关卡", value: "\(level)", color: .cyan)
-                HUDItem(title: "弹珠", value: "\(ballsRemaining)", color: .magenta)
+                HUDItem(title: "弹珠", value: "\(ballsRemaining)", color: .pink)
             }
             .padding()
             .background(.ultraThinMaterial)
