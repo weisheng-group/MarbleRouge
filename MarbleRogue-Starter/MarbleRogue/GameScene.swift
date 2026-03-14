@@ -169,7 +169,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         path.addLine(to: CGPoint(x: endX, y: endY))
         
         aimLine = SKShapeNode(path: path)
-        aimLine?.strokeColor = UIColor(cyan: 1.0, white: power, alpha: 0.8)
+        aimLine?.strokeColor = UIColor(red: 0.0, green: 1.0, blue: 1.0, alpha: 0.8)
         aimLine?.lineWidth = 4
         aimLine?.lineCap = .round
         aimLine?.glowWidth = 8
