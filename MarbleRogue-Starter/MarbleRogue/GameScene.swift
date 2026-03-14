@@ -172,13 +172,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         guard let touch = touches.first, !hasFired else { return }
         let location = touch.location(in: self)
         
-        // Only allow aiming from bottom area near the ball
-        let ballPos = currentBall?.node.position ?? startPosition
+        // Debug touch
+        print("Touch at: \(location)")
+        
+        // Get actual ball position
+        guard let ball = currentBall else {
+            print("No ball found!")
+            return
+        }
+        let ballPos = ball.node.position
         let distance = hypot(location.x - ballPos.x, location.y - ballPos.y)
         
-        if distance < 100 && location.y < 200 {
+        print("Ball at: \(ballPos), distance: \(distance)")
+        
+        // Allow touch anywhere near the bottom of screen
+        if location.y < 300 {  // Bottom third of screen
             isAiming = true
             touchStartPoint = ballPos
+            print("Aiming started!")
         }
     }
     
@@ -252,13 +263,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     private func fireBall(direction: CGVector, power: CGFloat) {
         aimLine?.removeFromParent()
+        // Remove indicators
+        childNode(withName: "aimIndicator")?.removeFromParent()
         hasFired = true
         gameState?.useBall()
         
         guard let ball = currentBall else { return }
         
         // Reset ball to start position then apply impulse
-        ball.node.position = startPosition
+        let startPos = touchStartPoint ?? CGPoint(x: size.width/2, y: 120)
+        ball.node.position = startPos
+        
+        print("Firing! Direction: \(direction), Power: \(power)")
         
         // Apply force in aim direction
         let impulse = CGVector(dx: direction.dx * power, dy: direction.dy * power)
