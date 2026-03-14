@@ -129,14 +129,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         currentBall?.node.removeFromParent()
         hasFired = false
         
-        // Ball position - higher up so it doesn't fall off immediately
+        // Ball position - high enough to not fall off
         let ballX = size.width / 2
-        let ballY: CGFloat = 250  // Higher position
+        let ballY: CGFloat = 300  // Higher position, well above bottom
         let ballPos = CGPoint(x: ballX, y: ballY)
         
         let ball = Ball(position: ballPos, type: .basic)
         currentBall = ball
         ball.node.zPosition = 100
+        
+        // CRITICAL: Disable physics until fired to prevent falling
+        ball.node.physicsBody?.isDynamic = false
+        
         addChild(ball.node)
         
         addAimIndicator(at: ballPos)
@@ -272,25 +276,28 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let pullDistance = drag * 0.3
         let ballX = start.x - cos(direction) * pullDistance
         let ballY = start.y - sin(direction) * pullDistance
+        
+        // Keep ball from falling during aiming
+        currentBall?.node.physicsBody?.isDynamic = false
         currentBall?.node.position = CGPoint(x: ballX, y: ballY)
     }
     
     private func fireBall(direction: CGVector, power: CGFloat) {
         aimLine?.removeFromParent()
-        // Remove indicators
         childNode(withName: "aimIndicator")?.removeFromParent()
         hasFired = true
         gameState?.useBall()
         
         guard let ball = currentBall else { return }
         
-        // Reset ball to start position then apply impulse
-        let startPos = touchStartPoint ?? CGPoint(x: size.width/2, y: 120)
+        // Reset ball to start position
+        let startPos = touchStartPoint ?? CGPoint(x: size.width/2, y: 300)
         ball.node.position = startPos
         
-        print("Firing! Direction: \(direction), Power: \(power)")
+        // CRITICAL: Enable physics before firing
+        ball.node.physicsBody?.isDynamic = true
         
-        // Apply force in aim direction
+        // Apply force
         let impulse = CGVector(dx: direction.dx * power, dy: direction.dy * power)
         ball.applyForce(impulse)
         
@@ -312,7 +319,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 }
             }
             
-            // Timeout after 10 seconds
             if timer.fireDate.timeIntervalSinceNow < -10 {
                 timer.invalidate()
                 self.checkLevelComplete()
