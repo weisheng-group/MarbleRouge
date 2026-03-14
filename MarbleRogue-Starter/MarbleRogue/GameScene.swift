@@ -102,18 +102,29 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         currentBall?.node.removeFromParent()
         hasFired = false
         
-        // Ensure start position is valid
-        let ballPos = CGPoint(x: size.width / 2, y: max(60, size.height * 0.1))
-        print("Spawning ball at: \(ballPos), screen size: \(size)")
+        // Force ball position to bottom center, higher up
+        let ballX = size.width / 2
+        let ballY: CGFloat = 120  // Fixed position above the buckets
+        let ballPos = CGPoint(x: ballX, y: ballY)
         
-        let ball = UpgradeSystem.shared.createBallWithUpgrades(at: ballPos)
+        print("=== SPAWNING BALL ===")
+        print("Screen size: \(size)")
+        print("Ball position: \(ballPos)")
+        
+        let ball = Ball(position: ballPos, type: .basic)  // Use basic ball for testing
         currentBall = ball
+        ball.node.zPosition = 1000  // Extremely high z-index
         
-        // Ensure ball is on top of everything
-        ball.node.zPosition = 100
+        // Force visibility
+        ball.node.isHidden = false
+        ball.node.alpha = 1.0
+        
         addChild(ball.node)
         
-        // Add visual indicator
+        print("Ball node added: \(ball.node)")
+        print("Ball parent: \(String(describing: ball.node.parent))")
+        
+        // Add indicator at same position
         addAimIndicator(at: ballPos)
     }
     
