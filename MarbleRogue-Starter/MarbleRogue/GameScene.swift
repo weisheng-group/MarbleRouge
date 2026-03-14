@@ -102,42 +102,51 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         currentBall?.node.removeFromParent()
         hasFired = false
         
-        let ball = UpgradeSystem.shared.createBallWithUpgrades(at: startPosition)
+        // Ensure start position is valid
+        let ballPos = CGPoint(x: size.width / 2, y: max(60, size.height * 0.1))
+        print("Spawning ball at: \(ballPos), screen size: \(size)")
+        
+        let ball = UpgradeSystem.shared.createBallWithUpgrades(at: ballPos)
         currentBall = ball
+        
+        // Ensure ball is on top of everything
+        ball.node.zPosition = 100
         addChild(ball.node)
         
-        // Add visual indicator for where to aim
-        addAimIndicator()
+        // Add visual indicator
+        addAimIndicator(at: ballPos)
     }
     
-    private func addAimIndicator() {
+    private func addAimIndicator(at position: CGPoint) {
         // Remove old indicator
         childNode(withName: "aimIndicator")?.removeFromParent()
         
-        // Large pulsing ring to show where the ball is
-        let ring = SKShapeNode(circleOfRadius: 30)
+        // Large pulsing ring
+        let ring = SKShapeNode(circleOfRadius: 40)
         ring.name = "aimIndicator"
-        ring.position = startPosition
+        ring.position = position
         ring.fillColor = .clear
-        ring.strokeColor = .white
-        ring.lineWidth = 3
-        ring.alpha = 0.5
+        ring.strokeColor = .yellow
+        ring.lineWidth = 4
+        ring.alpha = 0.8
+        ring.zPosition = 99
         
         let pulse = SKAction.sequence([
-            SKAction.scale(to: 1.2, duration: 0.5),
+            SKAction.scale(to: 1.3, duration: 0.5),
             SKAction.scale(to: 1.0, duration: 0.5)
         ])
         ring.run(SKAction.repeatForever(pulse))
         
         addChild(ring)
         
-        // Label
-        let label = SKLabelNode(text: "按住这里")
+        // Label below
+        let label = SKLabelNode(text: "← 向后拖动瞄准")
         label.name = "aimIndicator"
-        label.position = CGPoint(x: startPosition.x, y: startPosition.y - 50)
-        label.fontSize = 16
-        label.fontColor = .white
-        label.alpha = 0.7
+        label.position = CGPoint(x: position.x, y: position.y - 60)
+        label.fontSize = 18
+        label.fontColor = .yellow
+        label.alpha = 0.9
+        label.zPosition = 99
         addChild(label)
     }
     

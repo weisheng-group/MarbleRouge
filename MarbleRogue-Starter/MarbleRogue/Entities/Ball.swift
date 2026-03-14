@@ -16,23 +16,24 @@ class Ball {
     init(position: CGPoint, type: BallType = .basic) {
         self.type = type
         
-        // Main ball - looks like a real marble, BIGGER
-        self.node = SKShapeNode(circleOfRadius: 15)  // Increased from 12
+        // Main ball - BIGGER and BRIGHTER
+        self.node = SKShapeNode(circleOfRadius: 18)  // Bigger
         self.node.position = position
+        self.node.zPosition = 100  // On top
         
-        // Bright cyan color - very visible
+        // Bright neon cyan
         self.node.fillColor = UIColor(red: 0.0, green: 1.0, blue: 1.0, alpha: 1.0)
         self.node.strokeColor = UIColor.white
-        self.node.lineWidth = 3
-        self.node.glowWidth = 15
+        self.node.lineWidth = 4
+        self.node.glowWidth = 20
         
-        // Add inner highlight for 3D effect
-        let highlight = SKShapeNode(circleOfRadius: 4)
-        highlight.fillColor = .white
-        highlight.strokeColor = .clear
-        highlight.position = CGPoint(x: -3, y: 3)
-        highlight.alpha = 0.6
-        node.addChild(highlight)
+        // White center highlight
+        let center = SKShapeNode(circleOfRadius: 6)
+        center.fillColor = .white
+        center.strokeColor = .clear
+        center.position = CGPoint(x: -4, y: 4)
+        center.alpha = 0.8
+        node.addChild(center)
         
         // Add outer glow
         let glow = SKShapeNode(circleOfRadius: 16)
@@ -44,11 +45,11 @@ class Ball {
         node.addChild(glow)
         self.glowNode = glow
         
-        // Physics - realistic marble
-        self.node.physicsBody = SKPhysicsBody(circleOfRadius: 12)
-        self.node.physicsBody?.restitution = 0.85  // Bouncy like a marble
-        self.node.physicsBody?.friction = 0.1
-        self.node.physicsBody?.linearDamping = 0.2
+        // Physics - must match visual size
+        self.node.physicsBody = SKPhysicsBody(circleOfRadius: 18)
+        self.node.physicsBody?.restitution = 0.9
+        self.node.physicsBody?.friction = 0.0
+        self.node.physicsBody?.linearDamping = 0.1
         self.node.physicsBody?.angularDamping = 0.1
         self.node.physicsBody?.allowsRotation = true
         self.node.physicsBody?.categoryBitMask = PhysicsCategory.ball
