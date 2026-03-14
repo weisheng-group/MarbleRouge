@@ -8,7 +8,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private var targets: [Target] = []
     private var aimLine: SKShapeNode?
     private var touchStartPoint: CGPoint?
-    private let startPosition = CGPoint(x: 200, y: 100)
+    private var startPosition: CGPoint {
+        return CGPoint(x: size.width / 2, y: 80)
+    }
     
     private var isAiming = false
     private var hasFired = false
@@ -17,6 +19,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         setupScene()
         setupLevel()
         spawnBall()
+        
+        // Debug: Show where the ball should be
+        print("Screen size: \(size)")
+        print("Ball start position: \(startPosition)")
     }
     
     private func setupScene() {
@@ -99,6 +105,40 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let ball = UpgradeSystem.shared.createBallWithUpgrades(at: startPosition)
         currentBall = ball
         addChild(ball.node)
+        
+        // Add visual indicator for where to aim
+        addAimIndicator()
+    }
+    
+    private func addAimIndicator() {
+        // Remove old indicator
+        childNode(withName: "aimIndicator")?.removeFromParent()
+        
+        // Large pulsing ring to show where the ball is
+        let ring = SKShapeNode(circleOfRadius: 30)
+        ring.name = "aimIndicator"
+        ring.position = startPosition
+        ring.fillColor = .clear
+        ring.strokeColor = .white
+        ring.lineWidth = 3
+        ring.alpha = 0.5
+        
+        let pulse = SKAction.sequence([
+            SKAction.scale(to: 1.2, duration: 0.5),
+            SKAction.scale(to: 1.0, duration: 0.5)
+        ])
+        ring.run(SKAction.repeatForever(pulse))
+        
+        addChild(ring)
+        
+        // Label
+        let label = SKLabelNode(text: "按住这里")
+        label.name = "aimIndicator"
+        label.position = CGPoint(x: startPosition.x, y: startPosition.y - 50)
+        label.fontSize = 16
+        label.fontColor = .white
+        label.alpha = 0.7
+        addChild(label)
     }
     
     // MARK: - Touch Handling (Slingshot Style)

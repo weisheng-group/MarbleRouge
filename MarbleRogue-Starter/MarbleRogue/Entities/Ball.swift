@@ -16,14 +16,15 @@ class Ball {
     init(position: CGPoint, type: BallType = .basic) {
         self.type = type
         
-        // Main ball - looks like a real marble
-        self.node = SKShapeNode(circleOfRadius: 12)
+        // Main ball - looks like a real marble, BIGGER
+        self.node = SKShapeNode(circleOfRadius: 15)  // Increased from 12
         self.node.position = position
         
-        // Gradient-like effect using inner glow
-        self.node.fillColor = UIColor(red: 0.3, green: 0.8, blue: 1.0, alpha: 1.0)
-        self.node.strokeColor = UIColor(red: 0.5, green: 0.9, blue: 1.0, alpha: 1.0)
-        self.node.lineWidth = 2
+        // Bright cyan color - very visible
+        self.node.fillColor = UIColor(red: 0.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        self.node.strokeColor = UIColor.white
+        self.node.lineWidth = 3
+        self.node.glowWidth = 15
         
         // Add inner highlight for 3D effect
         let highlight = SKShapeNode(circleOfRadius: 4)
