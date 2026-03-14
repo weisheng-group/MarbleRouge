@@ -15,30 +15,27 @@ class Ball {
     init(position: CGPoint, type: BallType = .basic) {
         self.type = type
         
-        // Create ball with NEON colors - MUST BE VISIBLE
-        self.node = SKShapeNode(circleOfRadius: 20)
+        // Cyberpunk neon ball
+        self.node = SKShapeNode(circleOfRadius: 16)
         self.node.position = position
-        self.node.zPosition = 1000
+        self.node.zPosition = 100
         
-        // Bright neon cyan - impossible to miss
+        // Neon cyan core
         self.node.fillColor = UIColor(red: 0.0, green: 1.0, blue: 1.0, alpha: 1.0)
-        self.node.strokeColor = UIColor.white
-        self.node.lineWidth = 5
+        self.node.strokeColor = UIColor(red: 0.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        self.node.lineWidth = 3
+        self.node.glowWidth = 15
         
-        // Ensure it's not hidden
-        self.node.isHidden = false
-        self.node.alpha = 1.0
-        
-        // White inner circle for contrast
-        let inner = SKShapeNode(circleOfRadius: 8)
-        inner.fillColor = .white
-        inner.strokeColor = .clear
-        inner.position = CGPoint(x: -5, y: 5)
-        inner.zPosition = 1
-        node.addChild(inner)
+        // Inner white core for glow effect
+        let core = SKShapeNode(circleOfRadius: 6)
+        core.fillColor = .white
+        core.strokeColor = .clear
+        core.position = CGPoint(x: -3, y: 3)
+        core.alpha = 0.9
+        node.addChild(core)
         
         // Physics
-        self.node.physicsBody = SKPhysicsBody(circleOfRadius: 20)
+        self.node.physicsBody = SKPhysicsBody(circleOfRadius: 16)
         self.node.physicsBody?.restitution = 0.9
         self.node.physicsBody?.friction = 0.0
         self.node.physicsBody?.linearDamping = 0.1

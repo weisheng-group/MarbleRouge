@@ -98,13 +98,17 @@ struct HUDView: View {
     var body: some View {
         VStack {
             HStack(spacing: 20) {
-                HUDItem(title: "分数", value: "\(score)", color: .yellow)
-                HUDItem(title: "关卡", value: "\(level)", color: .cyan)
-                HUDItem(title: "弹珠", value: "\(ballsRemaining)", color: .pink)
+                HUDItem(title: "分数", value: "\(score)", color: Color(red: 1.0, green: 0.0, blue: 0.8)) // Neon Pink
+                HUDItem(title: "关卡", value: "\(level)", color: Color(red: 0.0, green: 1.0, blue: 1.0)) // Neon Cyan
+                HUDItem(title: "弹珠", value: "\(ballsRemaining)", color: Color(red: 1.0, green: 0.0, blue: 1.0)) // Neon Magenta
             }
             .padding()
-            .background(.ultraThinMaterial)
+            .background(Color.black.opacity(0.7))
             .cornerRadius(16)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color(red: 0.0, green: 1.0, blue: 1.0), lineWidth: 2)
+            )
             .padding(.top, 8)
             
             Spacer()

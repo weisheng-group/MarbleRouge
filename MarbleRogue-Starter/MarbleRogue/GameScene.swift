@@ -26,11 +26,38 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     private func setupScene() {
-        backgroundColor = UIColor(red: 0.05, green: 0.05, blue: 0.1, alpha: 1.0)
+        // Cyberpunk dark background
+        backgroundColor = UIColor(red: 0.02, green: 0.02, blue: 0.08, alpha: 1.0)
+        
+        // Add cyberpunk grid background
+        addCyberpunkGrid()
+        
         physicsWorld.contactDelegate = self
-        physicsWorld.gravity = CGVector(dx: 0, dy: -5)
+        physicsWorld.gravity = CGVector(dx: 0, dy: -4) // Slightly lighter gravity
         
         setupWalls()
+    }
+    
+    private func addCyberpunkGrid() {
+        // Horizontal neon lines
+        for i in 0..<10 {
+            let y = CGFloat(i) * (size.height / 10)
+            let line = SKShapeNode(rectOf: CGSize(width: size.width, height: 1))
+            line.position = CGPoint(x: size.width/2, y: y)
+            line.fillColor = UIColor(red: 1.0, green: 0.0, blue: 0.8, alpha: 0.1) // Neon pink
+            line.strokeColor = .clear
+            addChild(line)
+        }
+        
+        // Vertical neon lines
+        for i in 0..<6 {
+            let x = CGFloat(i) * (size.width / 6)
+            let line = SKShapeNode(rectOf: CGSize(width: 1, height: size.height))
+            line.position = CGPoint(x: x, y: size.height/2)
+            line.fillColor = UIColor(red: 0.0, green: 1.0, blue: 1.0, alpha: 0.1) // Neon cyan
+            line.strokeColor = .clear
+            addChild(line)
+        }
     }
     
     private func setupWalls() {
@@ -102,29 +129,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         currentBall?.node.removeFromParent()
         hasFired = false
         
-        // Force ball position to bottom center, higher up
+        // Ball position - higher up so it doesn't fall off immediately
         let ballX = size.width / 2
-        let ballY: CGFloat = 120  // Fixed position above the buckets
+        let ballY: CGFloat = 250  // Higher position
         let ballPos = CGPoint(x: ballX, y: ballY)
         
-        print("=== SPAWNING BALL ===")
-        print("Screen size: \(size)")
-        print("Ball position: \(ballPos)")
-        
-        let ball = Ball(position: ballPos, type: .basic)  // Use basic ball for testing
+        let ball = Ball(position: ballPos, type: .basic)
         currentBall = ball
-        ball.node.zPosition = 1000  // Extremely high z-index
-        
-        // Force visibility
-        ball.node.isHidden = false
-        ball.node.alpha = 1.0
-        
+        ball.node.zPosition = 100
         addChild(ball.node)
         
-        print("Ball node added: \(ball.node)")
-        print("Ball parent: \(String(describing: ball.node.parent))")
-        
-        // Add indicator at same position
         addAimIndicator(at: ballPos)
     }
     

@@ -10,34 +10,24 @@ class Peg {
         self.node = SKShapeNode(circleOfRadius: radius)
         self.node.position = position
         
-        // Different colors for different rows (like Peggle)
+        // Cyberpunk neon colors
         let colors: [UIColor] = [
-            .systemBlue,
-            .systemGreen,
-            .systemYellow,
-            .systemOrange,
-            .systemRed,
-            .systemPurple,
-            .systemPink,
-            .cyan
+            UIColor(red: 1.0, green: 0.0, blue: 0.8, alpha: 1.0),   // Neon Pink
+            UIColor(red: 0.0, green: 1.0, blue: 1.0, alpha: 1.0),   // Neon Cyan
+            UIColor(red: 1.0, green: 0.0, blue: 1.0, alpha: 1.0),   // Neon Magenta
+            UIColor(red: 0.5, green: 0.0, blue: 1.0, alpha: 1.0),   // Neon Purple
+            UIColor(red: 0.0, green: 1.0, blue: 0.5, alpha: 1.0),   // Neon Green
         ]
         let color = colors[row % colors.count]
         
         self.node.fillColor = color
         self.node.strokeColor = .white
-        self.node.lineWidth = 1.5
-        
-        // Add subtle 3D effect
-        let highlight = SKShapeNode(circleOfRadius: 3)
-        highlight.fillColor = .white
-        highlight.strokeColor = .clear
-        highlight.position = CGPoint(x: -2, y: 2)
-        highlight.alpha = 0.4
-        node.addChild(highlight)
+        self.node.lineWidth = 2
+        self.node.glowWidth = 8
         
         self.node.physicsBody = SKPhysicsBody(circleOfRadius: radius)
         self.node.physicsBody?.isDynamic = false
-        self.node.physicsBody?.restitution = 0.9  // Very bouncy
+        self.node.physicsBody?.restitution = 0.9
         self.node.physicsBody?.friction = 0.0
         self.node.physicsBody?.categoryBitMask = PhysicsCategory.peg
         self.node.physicsBody?.contactTestBitMask = PhysicsCategory.ball
