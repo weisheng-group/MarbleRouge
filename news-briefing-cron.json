@@ -1,0 +1,13 @@
+{
+  "name": "每日新闻热搜简报",
+  "schedule": "0 9 * * *",
+  "timezone": "Asia/Shanghai",
+  "sessionTarget": "isolated",
+  "payload": {
+    "kind": "agentTurn"
+  },
+  "delivery": {
+    "mode": "announce"
+  },
+  "prompt": "请获取今天的新闻热搜（科技、互联网、AI、国际热点等领域），整理5-10条重要新闻，为每条新闻提供：1) 核心要点（发生了什么）2) 背景信息（相关方、时间线）3) 影响分析（对行业/社会的潜在影响）。生成一份简洁的新闻简报，标题醒目，内容清晰。"
+}

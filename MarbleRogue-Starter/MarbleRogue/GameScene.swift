@@ -57,31 +57,36 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         pegs.removeAll()
         targets.removeAll()
         
-        // Create triangular peg layout
-        let rows = 6
-        let cols = 5
-        let spacing: CGFloat = 50
+        // Create classic Peggle-style board layout
+        let rows = 8
+        let cols = 7
+        let spacingX: CGFloat = 50
+        let spacingY: CGFloat = 45
         let startX = size.width / 2
-        let startY = size.height - 200
+        let startY = size.height - 180
         
+        // Create triangular peg pattern (like real pachinko/Peggle)
         for row in 0..<rows {
-            for col in 0..<cols {
-                let xOffset = CGFloat(col - cols/2) * spacing + (row % 2 == 0 ? 0 : spacing/2)
-                let x = startX + xOffset
-                let y = startY - CGFloat(row) * spacing
+            let pegsInRow = cols - abs(row - 3)  // More pegs in middle rows
+            let rowWidth = CGFloat(pegsInRow - 1) * spacingX
+            let rowStartX = startX - rowWidth / 2
+            
+            for col in 0..<pegsInRow {
+                let x = rowStartX + CGFloat(col) * spacingX
+                let y = startY - CGFloat(row) * spacingY
                 
-                if x > 30 && x < size.width - 30 {
-                    let peg = Peg(position: CGPoint(x: x, y: y))
-                    pegs.append(peg)
-                    addChild(peg.node)
-                }
+                // Color variation based on row
+                let peg = Peg(position: CGPoint(x: x, y: y), row: row)
+                pegs.append(peg)
+                addChild(peg.node)
             }
         }
         
-        // Add targets at top
-        for i in 0..<4 {
-            let x = size.width / 2 + CGFloat(i - 1) * 80 - 40
-            let target = Target(position: CGPoint(x: x, y: size.height - 80))
+        // Add bucket/targets at bottom
+        let bucketY: CGFloat = 80
+        for i in 0..<5 {
+            let x = size.width * 0.2 + CGFloat(i) * size.width * 0.15
+            let target = Target(position: CGPoint(x: x, y: bucketY), pointValue: 50 + i * 50)
             targets.append(target)
             addChild(target.node)
         }
@@ -96,16 +101,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(ball.node)
     }
     
-    // MARK: - Touch Handling
+    // MARK: - Touch Handling (Slingshot Style)
+    
+    private var aimDirection: CGVector = .zero
+    private var dragDistance: CGFloat = 0
+    private let maxDragDistance: CGFloat = 150
+    private let maxPower: CGFloat = 25
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first, !hasFired else { return }
         let location = touch.location(in: self)
         
-        // Only allow aiming from bottom area
-        if location.y < 250 {
+        // Only allow aiming from bottom area near the ball
+        let ballPos = currentBall?.node.position ?? startPosition
+        let distance = hypot(location.x - ballPos.x, location.y - ballPos.y)
+        
+        if distance < 100 && location.y < 200 {
             isAiming = true
-            touchStartPoint = currentBall?.node.position ?? startPosition
+            touchStartPoint = ballPos
         }
     }
     
@@ -113,55 +126,83 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         guard let touch = touches.first, isAiming, let startPoint = touchStartPoint else { return }
         let location = touch.location(in: self)
         
-        updateAimLine(from: startPoint, to: location)
+        // Calculate drag vector (opposite direction for slingshot feel)
+        let dx = startPoint.x - location.x
+        let dy = startPoint.y - location.y
+        dragDistance = min(hypot(dx, dy), maxDragDistance)
+        
+        // Calculate aim direction (opposite to drag)
+        let angle = atan2(dy, dx)
+        aimDirection = CGVector(dx: cos(angle), dy: sin(angle))
+        
+        updateAimLine(from: startPoint, direction: angle, power: dragDistance / maxDragDistance)
+        updateBallPositionWhileAiming(from: startPoint, direction: angle, drag: dragDistance)
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first, isAiming, let startPoint = touchStartPoint else { return }
-        let location = touch.location(in: self)
+        guard isAiming else { return }
         
         isAiming = false
         touchStartPoint = nil
         
-        // Only fire if dragged far enough
-        let dx = location.x - startPoint.x
-        let dy = location.y - startPoint.y
-        let distance = sqrt(dx*dx + dy*dy)
-        
-        if distance > 20 {
-            fireBall(from: startPoint, to: location)
+        // Fire with power based on drag distance
+        if dragDistance > 20 {
+            let power = (dragDistance / maxDragDistance) * maxPower
+            fireBall(direction: aimDirection, power: power)
         } else {
             aimLine?.removeFromParent()
+            // Reset ball position
+            currentBall?.node.position = startPosition
         }
     }
     
-    private func updateAimLine(from start: CGPoint, to end: CGPoint) {
+    private func updateAimLine(from start: CGPoint, direction: CGFloat, power: CGFloat) {
         aimLine?.removeFromParent()
+        
+        // Draw trajectory preview
+        let lineLength: CGFloat = 100 + 100 * power
+        let endX = start.x + cos(direction) * lineLength
+        let endY = start.y + sin(direction) * lineLength
         
         let path = CGMutablePath()
         path.move(to: start)
-        path.addLine(to: end)
+        path.addLine(to: CGPoint(x: endX, y: endY))
         
         aimLine = SKShapeNode(path: path)
-        aimLine?.strokeColor = .white
-        aimLine?.lineWidth = 3
-        aimLine?.alpha = 0.6
-        aimLine?.glowWidth = 5
+        aimLine?.strokeColor = UIColor(cyan: 1.0, white: power, alpha: 0.8)
+        aimLine?.lineWidth = 4
+        aimLine?.lineCap = .round
+        aimLine?.glowWidth = 8
+        
+        // Dashed line effect
+        let pattern: [CGFloat] = [10, 5]
+        let dashedPath = path.copy(dashingWithPhase: 0, lengths: pattern)
+        aimLine?.path = dashedPath
+        
         addChild(aimLine!)
     }
     
-    private func fireBall(from start: CGPoint, to target: CGPoint) {
+    private func updateBallPositionWhileAiming(from start: CGPoint, direction: CGFloat, drag: CGFloat) {
+        // Pull ball back in opposite direction of aim
+        let pullDistance = drag * 0.3
+        let ballX = start.x - cos(direction) * pullDistance
+        let ballY = start.y - sin(direction) * pullDistance
+        currentBall?.node.position = CGPoint(x: ballX, y: ballY)
+    }
+    
+    private func fireBall(direction: CGVector, power: CGFloat) {
         aimLine?.removeFromParent()
         hasFired = true
         gameState?.useBall()
         
         guard let ball = currentBall else { return }
         
-        let dx = target.x - start.x
-        let dy = target.y - start.y
-        let power: CGFloat = 0.12
+        // Reset ball to start position then apply impulse
+        ball.node.position = startPosition
         
-        ball.applyForce(CGVector(dx: dx * power, dy: dy * power))
+        // Apply force in aim direction
+        let impulse = CGVector(dx: direction.dx * power, dy: direction.dy * power)
+        ball.applyForce(impulse)
         
         // Check when ball stops
         Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { [weak self] timer in
